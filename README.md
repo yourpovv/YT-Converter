@@ -5,7 +5,7 @@
 
 **Terminal YouTube downloader for MP3 audio and MP4 video**
 
-<img width="995" height="538" alt="image" src="https://github.com/user-attachments/assets/54451a89-de9e-4463-957e-0e655e80f389" />
+<img width="995" height="538" alt="image" src="https://github.com/user-attachments/assets/bbf2bcfc-b764-40a3-85d9-9fd2429fa602" />
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-Windows-lightgrey)](https://github.com/yourpovv/YT-Converter)
