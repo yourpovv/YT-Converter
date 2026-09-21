@@ -81,10 +81,49 @@ func textRow(margin string, line bannerLine, width int) string {
 }
 
 func consoleWidth() int {
+	if width, ok := windowsConsoleWidth(); ok {
+		return width
+	}
 	if columns, err := strconv.Atoi(os.Getenv("COLUMNS")); err == nil && columns > 0 {
 		return columns
 	}
 	return fallbackWidth
+}
+
+type consoleWindowRect struct {
+	Left, Top, Right, Bottom int16
+}
+
+type consoleScreenBufferInfo struct {
+	Size              [2]int16
+	CursorPosition    [2]int16
+	Attributes        uint16
+	Window            consoleWindowRect
+	MaximumWindowSize [2]int16
+}
+
+func windowsConsoleWidth() (int, bool) {
+	if runtime.GOOS != "windows" {
+		return 0, false
+	}
+	kernel32 := syscall.NewLazyDLL("kernel32.dll")
+	getStdHandle := kernel32.NewProc("GetStdHandle")
+	getScreenBufferInfo := kernel32.NewProc("GetConsoleScreenBufferInfo")
+
+	stdout, _, _ := getStdHandle.Call(uintptr(stdOutputHandle))
+	if stdout == ^uintptr(0) {
+		return 0, false
+	}
+	var info consoleScreenBufferInfo
+	ok, _, _ := getScreenBufferInfo.Call(stdout, uintptr(unsafe.Pointer(&info)))
+	if ok == 0 {
+		return 0, false
+	}
+	width := int(info.Window.Right-info.Window.Left) + 1
+	if width <= 0 {
+		return 0, false
+	}
+	return width, true
 }
 
 func enableWindowsConsole() {

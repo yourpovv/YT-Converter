@@ -66,12 +66,7 @@ func handleDownload(reader *bufio.Reader, option downloadOption) {
 	if err != nil {
 		return
 	}
-	downloadsPath, err := download.createDownloadsDir()
-	if err != nil {
-		reportError(err)
-		pressToGoBack()
-		return
-	}
+	downloadsPath := download.DownloadsDir()
 	savePath := filepath.Join(downloadsPath, fileName+option.extension)
 
 	fmt.Println(utils.Gradient(option.progressLabel, utils.Minty))

@@ -39,16 +39,20 @@ func FfmpegPath() (string, error) {
 	return absFfmpegPath, nil
 }
 
-func createDownloadsDir() (string, error) {
+func DownloadsDir() string {
 	dir, err := os.Getwd()
 	if err != nil {
-		return "", fmt.Errorf("locate working directory: %w", err)
+		return "downloads"
 	}
-	downloadsPath := filepath.Join(dir, "downloads")
-	if err := os.MkdirAll(downloadsPath, os.ModePerm); err != nil {
-		return "", fmt.Errorf("create downloads folder %s: %w", downloadsPath, err)
+	return filepath.Join(dir, "downloads")
+}
+
+func ensureParentDir(absPath string) error {
+	parent := filepath.Dir(absPath)
+	if err := os.MkdirAll(parent, os.ModePerm); err != nil {
+		return fmt.Errorf("create downloads folder %s: %w", parent, err)
 	}
-	return downloadsPath, nil
+	return nil
 }
 
 func OpenDownloadsDir(path string) error {
@@ -79,6 +83,10 @@ func DownloadMP3(youtubeURL, outputPath string) error {
 		return err
 	}
 
+	if err := ensureParentDir(absPath); err != nil {
+		return err
+	}
+
 	if err := runWithOutput(tools.ytDlp, "--extractor-args", youtubeExtractorArgs, "-x", "--audio-format", "mp3", "--ffmpeg-location", tools.ffmpeg, "-o", absPath, youtubeURL); err != nil {
 		return fmt.Errorf("download audio: %w", err)
 	}
@@ -94,6 +102,10 @@ func DownloadMP4(youtubeURL, outputPath string) error {
 
 	absPath, err := resolveSavePath(outputPath)
 	if err != nil {
+		return err
+	}
+
+	if err := ensureParentDir(absPath); err != nil {
 		return err
 	}
 
